@@ -66,9 +66,9 @@ public class WorkflowController extends Controller {
 	@PostMapping(path = "/api/workflow/{uuid}/execute", consumes={ MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE })
 	public ResponseEntity<byte[]> execute(@PathVariable String uuid,
 										  @RequestParam(required = false) String params) throws Exception {
-		ZipFile zf = this.wService.ExecuteZip(uuid, params);
+		byte[] content = this.wService.Execute(uuid, params);
 
-		return FilesResponse.build("workflow_results.zip", zf.toByteArray());
+		return FilesResponse.build("scenario.json", content);
 	}
 
 	@DeleteMapping(path="/api/workflow/{uuid}")

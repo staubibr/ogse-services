@@ -19,7 +19,7 @@ public class PythonProcess extends Process {
 		this.workspace = new Folder(tool.getParent());		
 	}
 
-	public List<File> execute(Folder scratch, Folder folder, JsonNode params) throws Exception {
+	public File execute(Folder scratch, Folder folder, JsonNode params) throws Exception {
 		Path workflow = folder.path("workflow.json");
 		Path experiment = scratch.path("experiment.json");
 
@@ -34,6 +34,6 @@ public class PythonProcess extends Process {
 		
 		if (exit != 0) throw new Exception("Unable to execute the workflow.");
 
-		return scratch.files().stream().filter((File f) -> !f.getName().equals("workflow.json")).collect(Collectors.toList());
+		return scratch.file("scenario.json");
 	}
 }

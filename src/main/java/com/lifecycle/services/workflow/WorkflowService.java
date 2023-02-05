@@ -2,6 +2,7 @@ package com.lifecycle.services.workflow;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Date;
 import java.util.List;
 
@@ -106,10 +107,12 @@ public class WorkflowService {
     	workflows.Save();
     }
 
-	public List<File> Execute(Folder scratch, String uuid, JsonNode params) throws Exception {
+	public File Execute(Folder scratch, String uuid, JsonNode params) throws Exception {
 		PythonProcess p = new PythonProcess(PYTHON_POSTGRES);
 
 		Folder folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid);
+
+		return p.execute(scratch, folder, params);
 
 		// TODO: Just so I don't forget, these are the function calls to publish to GeoServer.
 		// TODO: Code doesn't belong here though.
@@ -118,24 +121,18 @@ public class WorkflowService {
 		// GeoServer.post_feature_type(schema, "oil_rings");
 		// GeoServer.post_feature_type(schema, "grid_cells");
 		// GeoServer.delete_workspace(schema);
-
-		return p.execute(scratch, folder, params);
 	}
 
-	public List<File> Execute(Folder scratch, String uuid, String s_params) throws Exception {
+	public byte[] Execute(String uuid, String s_params) throws Exception {
+		UuidFolder scratch = new UuidFolder(APP_FOLDERS_SCRATCH);
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode params = mapper.readTree(s_params);
 
-		return this.Execute(scratch, uuid, params);
-	}
-
-	public ZipFile ExecuteZip(String uuid, String params) throws Exception {
-		UuidFolder scratch = new UuidFolder(APP_FOLDERS_SCRATCH);
-		List<File> files = this.Execute(scratch, uuid, params);
-		ZipFile zf = new ZipFile(files);
+		File file = this.Execute(scratch, uuid, params);
+		byte[] content = Files.readAllBytes(file.toPath());
 
 		scratch.delete();
 
-		return zf;
+		return content;
 	}
 }
