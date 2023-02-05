@@ -111,6 +111,14 @@ public class WorkflowService {
 
 		Folder folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid);
 
+		// TODO: Just so I don't forget, these are the function calls to publish to GeoServer.
+		// TODO: Code doesn't belong here though.
+		// GeoServer.post_workspace(schema);
+		// GeoServer.post_data_store(schema);
+		// GeoServer.post_feature_type(schema, "oil_rings");
+		// GeoServer.post_feature_type(schema, "grid_cells");
+		// GeoServer.delete_workspace(schema);
+
 		return p.execute(scratch, folder, params);
 	}
 
