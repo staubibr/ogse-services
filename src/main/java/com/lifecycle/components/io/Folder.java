@@ -1,42 +1,76 @@
 package com.lifecycle.components.io;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 public class Folder {
 
-	public Path path;
+	public String path;
 	
-	public Folder(Path path) throws IOException {
+	public Folder(String path) {
 		this.path = path;
-		
-		File file = new File(path.toString());
+	}
 
-		if (!file.exists()) file.mkdirs();
+	public Folder(String first, String ...more) {
+		this(Paths.get(first, more).toString());
 	}
-	
-	public Folder(String first, String ...more) throws IOException {		
-		this(Paths.get(first, more));
+
+	public Folder write(String name, byte[] content) throws IOException {
+		Path p = Paths.get(this.path, name);
+
+		Files.write(p, content);
+
+		return this;
 	}
-	
-	public Folder(String root, UUID uuid) throws IOException {		
-		this(root, uuid.toString());
+
+	public Folder write(String name, String content) throws IOException {
+		return this.write(name, content.getBytes());
 	}
-	
+
+	public Folder create(String name) throws IOException {
+		Path p = Paths.get(this.path, name);
+		File f = new File(p.toString());
+
+		if (f.exists()) throw new IOException("Cannot create folder " + name + ", it already exists.");
+
+		if (!f.mkdirs()) throw new IOException("Unable to create folder " + name + ".");
+
+		return new Folder(p.toString());
+	}
+
+	public Folder create_uuid() throws IOException {
+		return this.create(this.get_uuid().toString());
+	}
+
+	public UUID get_uuid() {
+		UUID uuid;
+
+		do uuid = UUID.randomUUID();
+
+		while (this.exists(uuid.toString()));
+
+		return uuid;
+	}
+
+	public boolean exists(String... file_name) {
+		File f = Paths.get(this.path, file_name).toFile();
+
+		return f.exists();
+	}
+
 	public void copy(InputStream f, String file_name) throws IOException {
-		Path copy_path = Paths.get(path.toString(), file_name);
+		java.nio.file.Files.copy(f, Paths.get(path, file_name), StandardCopyOption.REPLACE_EXISTING);
 
-		java.nio.file.Files.copy(f, copy_path, StandardCopyOption.REPLACE_EXISTING);
-		
 		f.close();
 	}
 
@@ -55,46 +89,71 @@ public class Folder {
 	public void copy(File f, String file_name) throws IOException {
 		this.copy(new FileInputStream(f), file_name);
 	}
-	
-	public Folder makeFolder(String name) throws IOException {
-		Path path = this.path(name);
-		
-		path.toFile().mkdirs();
-		
-		return new Folder(path);
+
+	public void delete(String... file_names) throws IOException {
+		File f = Paths.get(this.path, file_names).toFile();
+
+		FileSystemUtils.deleteRecursively(Objects.requireNonNull(f, "Folder requested does not exist."));
 	}
 
 	public void delete() throws IOException {
-		File directory = new File(path.toString());
-		
-		if (!directory.exists()) throw new IOException("Cannot delete folder " + path.toString() + ", it does not exist.");
+		File f = Paths.get(this.path).toFile();
 
-		FileSystemUtils.deleteRecursively(directory);
+		FileSystemUtils.deleteRecursively(Objects.requireNonNull(f, "Folder requested does not exist."));
 	}
-	
-	public Path path(String... file_name) {
-		return Paths.get(path.toString(), file_name);
+
+	public void empty(String... file_names) throws IOException {
+		File f = Paths.get(this.path, file_names).toFile();
+
+		FileUtils.cleanDirectory(f);
 	}
-	
+
+	public void empty() throws IOException {
+		File f = Paths.get(this.path).toFile();
+
+		FileUtils.cleanDirectory(f);
+	}
+
 	public List<File> files() {
-		File folder = new File(this.path.toString());
+		File f = Paths.get(this.path).toFile();
 
-		return new ArrayList<>(Arrays.asList(Objects.requireNonNull(folder.listFiles())));
+		return new ArrayList<>(Arrays.asList(Objects.requireNonNull(f.listFiles(), "Folder requested does not exist.")));
 	}
 
 	public List<File> files(String ... file_names) {
-		File folder = path(file_names).toFile();
+		File f = Paths.get(this.path, file_names).toFile();
 
-		return new ArrayList<>(Arrays.asList(Objects.requireNonNull(folder.listFiles())));
+		return new ArrayList<>(Arrays.asList(Objects.requireNonNull(f.listFiles(), "Folder requested does not exist.")));
 	}
 
 	public File file(String... file_name) throws Exception {
-		String path = path(file_name).toString();
-		File file = new File(path);
-		
-		if (!file.exists()) throw new Exception("File requested does not exist.");
-		
-		return file;
+		File f = Paths.get(this.path, file_name).toFile();
+
+		return Objects.requireNonNull(f, "File requested does not exist.");
+	}
+	public Folder folder(String... folder_name) throws Exception {
+		return new Folder(Paths.get(this.path, folder_name).toString());
 	}
 
+	public byte[] zip(List<File> files) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ZipOutputStream zos = new ZipOutputStream(baos);
+
+		for (File file : files) {
+			FileInputStream fis = new FileInputStream(file);
+			ZipEntry entry = new ZipEntry(file.getName());
+
+			zos.putNextEntry(entry);
+			zos.write(fis.readAllBytes());
+			zos.closeEntry();
+		}
+
+		zos.close();
+
+		return baos.toByteArray();
+	}
+
+	public byte[] zip() throws IOException {
+		return this.zip(this.files());
+	}
 }

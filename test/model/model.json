@@ -1,0 +1,64 @@
+{
+    "title": "Test 1",
+    "alternative": null,
+    "creator": ["Bruno St-Aubin"],
+    "language": ["en-CA"],
+    "description": ["This is a model metadata file used to test the model services."],
+    "subject": ["oil", "gis", "simple", "economic"],
+    "spatial coverage": [{
+            "placename": ["Alberta"],
+            "extent": [{
+                    "reference": "epsg:4326",
+                    "x min": -120.000,
+                    "x max": -110.000,
+                    "y min": 49.000,
+                    "y max": 60.000
+                }
+            ]
+        }
+    ],
+    "temporal coverage": null,
+    "license": ["https://opensource.org/licenses/MIT"],
+    "created": "2022-12-20",
+    "modified": null,
+    "time": "days",
+    "state": {
+        "description": "Who knows.",
+        "message type": 1
+    },
+    "behavior": ["Unimplemented"],
+    "port": [{
+            "type": "input",
+            "name": "in_barrel_price",
+            "message type": 2
+        }
+    ],
+    "message type": [{
+            "identifier": 1,
+            "field": [{
+                    "name": "barrel price",
+                    "description": "The current price of an oil barrel",
+                    "type": "numerical",
+                    "uom": "dollars",
+					"scalar": "1"
+                },{
+                    "name": "GDP (GST)",
+                    "description": "GST for the cell given the current oil barrel price",
+                    "type": "numerical",
+                    "uom": "dollars",
+					"scalar": "1"
+                }
+            ]
+        },{
+            "identifier": 2,
+            "field": [{
+                    "name": "barrel price",
+                    "description": "The current price of an oil barrel",
+                    "type": "numerical",
+                    "uom": "dollars",
+					"scalar": "1"
+                }
+            ]
+        }
+    ]
+}

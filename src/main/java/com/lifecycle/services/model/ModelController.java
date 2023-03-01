@@ -1,10 +1,12 @@
 package com.lifecycle.services.model;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.Date;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lifecycle.components.metadata.Atomic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,9 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.lifecycle.entities.metadata.Entities;
-import com.lifecycle.entities.metadata.Entity;
-import com.lifecycle.entities.metadata.Model;
+import com.lifecycle.components.metadata.Entity;
+import com.lifecycle.components.metadata.Model;
 import com.lifecycle.components.rest.Controller;
 import com.lifecycle.components.rest.FilesResponse;
 import com.lifecycle.components.rest.RestResponse;
@@ -35,10 +36,37 @@ public class ModelController extends Controller {
     public ModelController(ModelService mService) {
         this.mService = mService;
     }
-	
+
+	@GetMapping(path="/api/model/list", produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<byte[]> get() throws Exception {
+		return FilesResponse.build(this.mService.inventory.file);
+	}
+
+	@GetMapping(path="/api/model/list", produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView getList() throws Exception {
+		ModelAndView mv = new ModelAndView();
+
+		mv.addObject("entities", this.mService.inventory.entities);
+		mv.setViewName("lifecycle/model-list");
+
+		return mv;
+	}
+
 	@GetMapping(path="/api/model/{uuid}", produces=MediaType.APPLICATION_JSON_VALUE)
     public Entity getEntity(@PathVariable String uuid) throws Exception {
     	return this.mService.Read(uuid);
+	}
+
+	@GetMapping(path="/api/model/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView getModel(@PathVariable(value="uuid") String uuid) throws Exception {
+		ModelAndView mv = new ModelAndView();
+		ObjectMapper om = new ObjectMapper();
+		Model model = om.readValue(this.mService.ReadFile(uuid), Atomic.class);
+
+		mv.addObject("model", model);
+		mv.setViewName("lifecycle/model");
+
+		return mv;
 	}
 	
 	@GetMapping(path="/api/model/{uuid}/file", produces=MediaType.APPLICATION_JSON_VALUE)
@@ -47,66 +75,36 @@ public class ModelController extends Controller {
     	
     	return FilesResponse.build(file);
 	}
-	
-	@GetMapping(path="/api/model/list", produces=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<byte[]> get() throws Exception {
-    	File file = this.mService.List();
 
-    	return FilesResponse.build(file);
-	}
-	
 	@PostMapping(path="/api/model", consumes={ MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public ObjectNode post(@RequestPart MultipartFile model,
-						   @RequestParam(required = false) String name,
+						   @RequestParam String name,
 						   @RequestParam(required = false) String description) throws Exception {
 		return this.mService.Create(name, description, model).json();
     }
-	
-	@DeleteMapping(path="/api/model/{uuid}")
-    public ResponseEntity<RestResponse> delete(@PathVariable String uuid) throws Exception {
-    	this.mService.Delete(uuid);
-    	
-    	return this.handleSuccess();
-    }
+
+	@GetMapping(path="/api/model", produces = MediaType.TEXT_HTML_VALUE)
+	public ModelAndView getPublish() throws Exception {
+		ModelAndView mv = new ModelAndView();
+
+		mv.setViewName("lifecycle/model-publish");
+
+		return mv;
+	}
 	
 	@PutMapping(path="/api/model/{uuid}")
     public ObjectNode put(@PathVariable String uuid, 
-						  @RequestParam(required = false) MultipartFile model,
-						  @RequestParam(required = false) String name,
+						  @RequestParam MultipartFile model,
+						  @RequestParam String name,
 						  @RequestParam(required = false) String description,
 						  @RequestParam(required = false) Date created) throws Exception {
     	return this.mService.Update(uuid, name, description, created, model).json();
 	}
 
-	/// HTML Endpoints
-	@GetMapping(path="/api/model", produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView getPublish() throws Exception {
-		ModelAndView mv = new ModelAndView();
+	@DeleteMapping(path="/api/model/{uuid}")
+	public RestResponse delete(@PathVariable String uuid) throws Exception {
+		this.mService.Delete(uuid);
 
-        mv.setViewName("lifecycle/model-publish");
-        
-        return mv;
+		return new RestResponse(HttpStatus.OK.value(), "Success");
 	}
-
-	@GetMapping(path="/api/model/list", produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView getList() throws Exception {
-		ModelAndView mv = new ModelAndView();
-		Entities<Entity> entities = this.mService.Entities();
-		
-        mv.addObject("entities", entities.entities);
-        mv.setViewName("lifecycle/model-list");
-        
-        return mv;
-	}
-	
-	@GetMapping(path="/api/model/{uuid}", produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView getModel(@PathVariable(value="uuid") String uuid) throws Exception {
-		ModelAndView mv = new ModelAndView();
-        Model model = this.mService.ReadAtomicModel(uuid);
-        
-        mv.addObject("model", model);
-        mv.setViewName("lifecycle/model");
-        
-        return mv;
-    }
 }

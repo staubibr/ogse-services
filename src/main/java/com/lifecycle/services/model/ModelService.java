@@ -3,91 +3,62 @@ package com.lifecycle.services.model;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.UUID;
 
-import com.lifecycle.entities.metadata.Atomic;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lifecycle.entities.metadata.Entities;
-import com.lifecycle.entities.metadata.Entity;
-import com.lifecycle.entities.metadata.Model;
+import com.lifecycle.components.metadata.Inventory;
+import com.lifecycle.components.metadata.Entity;
 import com.lifecycle.components.io.Folder;
-import com.lifecycle.components.io.UuidFolder;
 
 @Service
 public class ModelService {
-	
-	@Value("${app.folders.models}")
-	private String APP_FOLDERS_MODELS;
-	
-	@Value("${app.list.models}")
-	private String APP_MODELS;
+
+	public final Inventory inventory;
+	public final Folder folder;
 
     @Autowired
-	public ModelService() {
-
+	public ModelService(@Value("${app.list.models}") String inventory,
+						@Value("${app.folders.models}") String folder) throws IOException {
+		// TODO: This may be a mistake. It's constructed only when launching the service. So it desyncs if manual
+		// TODO: changes are made to the files (which shouldn't happen). But it could also be a problem if the services
+		// TODO: fail once every while and the inventory is not cleaned up.
+		this.inventory = new Inventory(inventory);
+		this.folder = new Folder(folder);
 	}
-	
-    public Entities<Entity> Entities() throws JsonParseException, JsonMappingException, IOException {
-    	return new Entities<Entity>(APP_MODELS, Entity.class); 
-    }
-	
-    public File List() throws IOException {
-    	return new File(APP_MODELS);
-    }
     
     public Entity Create(String name, String description, MultipartFile model) throws Exception {
-    	Entities<Entity> models = new Entities<Entity>(APP_MODELS, Entity.class); 
-		UuidFolder scratch = new UuidFolder(APP_FOLDERS_MODELS);
-		Entity entity = models.Add(new Entity(scratch.uuid, name, description));
-		
-    	models.Save();
-		scratch.copy(model, "model.json");
-    	
+		UUID uuid = this.folder.get_uuid();
+		this.folder.create(uuid.toString()).copy(model, "model.json");
+
+		Entity entity = this.inventory.Add(new Entity(uuid, name, description));
+		this.inventory.Save();
+
 		return entity;
     }
-    
+
     public Entity Read(String uuid) throws Exception {
-		Entities<Entity> models = Entities(); 
-    	
-		return models.Get((e) -> e.getUuid().toString().equals(uuid));
+		return this.inventory.Get(uuid);
     }
     
     public File ReadFile(String uuid) throws Exception {
-    	Folder folder = new Folder(APP_FOLDERS_MODELS, uuid);
-    	
-    	return folder.file("model.json");
+    	return this.folder.file(uuid, "model.json");
     }
-    
-    public Atomic ReadAtomicModel(String uuid) throws Exception {
-    	ObjectMapper om = new ObjectMapper();
-    	
-    	return om.readValue(this.ReadFile(uuid), Atomic.class);
-    }
-    
+
 	public Entity Update(String uuid, String name, String description, Date created, MultipartFile model) throws Exception {
-		Entities<Entity> models = Entities(); 
-		Entity updated = models.Update(new Entity(uuid, name, description, created));
-		Folder folder = new Folder(APP_FOLDERS_MODELS, uuid);
-		
-		models.Save();
+		Entity updated = this.inventory.Update(new Entity(uuid, name, description, created));
+		this.inventory.Save();
 	
-		if (model != null) folder.copy(model, "model.json");
+		if (model != null) this.folder.folder(uuid).copy(model, "model.json");
 		
 		return updated;
 	}
 	
     public void Delete(String uuid) throws Exception {
-		Entities<Entity> models = Entities(); 
-    	Folder folder = new Folder(APP_FOLDERS_MODELS, uuid);
-
-    	folder.delete();
-    	models.Remove(uuid);
-    	models.Save();
+    	this.folder.delete(uuid);
+		this.inventory.Remove(uuid).Save();
     }
 }

@@ -1,4 +1,4 @@
-package com.lifecycle.entities.metadata;
+package com.lifecycle.components.metadata;
 
 import java.util.Date;
 import java.util.List;

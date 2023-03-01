@@ -1,0 +1,162 @@
+{
+    "metadata": {
+        "title": "Workflow Test 1 Updated",
+        "language": ["en-US"],
+        "description": ["GIS Emergency management workflow for the second version of the workflow engine."],
+        "subject": ["gis", "simple", "health"]
+    },
+    "scenario": {
+        "models": [{
+                "id": "Emergency Areas",
+                "type": "71b7ac8b-b30b-4e67-b306-2332e27995d0",
+                "table": "emergency_areas",
+                "properties": ["dauid", "dapop_2016"]
+            }, {
+                "id": "Hospitals",
+                "type": "89b31233-5f69-4bed-9aa4-3d0051fdfab8",
+                "table": "hospitals",
+                "properties": ["index", "facility_name", "rate", "capacity"]
+            }
+        ],
+        "couplings": [{
+                "table": "emergency_areas",
+                "from": {
+                    "field": "id",
+                    "model": "Emergency Areas",
+                    "port": "out_1"
+                },
+                "to": {
+                    "field": "hospital_1",
+                    "model": "Hospitals",
+                    "port": "processor_in"
+                }
+            }, {
+                "table": "emergency_areas",
+                "from": {
+                    "field": "id",
+                    "model": "Emergency Areas",
+                    "port": "out_2"
+                },
+                "to": {
+                    "field": "hospital_2",
+                    "model": "Hospitals",
+                    "port": "processor_in"
+                }
+            }, {
+                "table": "emergency_areas",
+                "from": {
+                    "field": "id",
+                    "model": "Emergency Areas",
+                    "port": "out_3"
+                },
+                "to": {
+                    "field": "hospital_3",
+                    "model": "Hospitals",
+                    "port": "processor_in"
+                }
+            }, {
+                "table": "emergency_areas",
+                "from": {
+                    "field": "hospital_1",
+                    "model": "Hospitals",
+                    "port": "processor_out"
+                },
+                "to": {
+                    "field": "id",
+                    "model": "Emergency Areas",
+                    "port": "rejected_1"
+                }
+            }, {
+                "table": "emergency_areas",
+                "from": {
+                    "field": "hospital_2",
+                    "model": "Hospitals",
+                    "port": "processor_out"
+                },
+                "to": {
+                    "field": "id",
+                    "model": "Emergency Areas",
+                    "port": "rejected_1"
+                }
+            }, {
+                "table": "emergency_areas",
+                "from": {
+                    "field": "hospital_3",
+                    "model": "Hospitals",
+                    "port": "processor_out"
+                },
+                "to": {
+                    "field": "id",
+                    "model": "Emergency Areas",
+                    "port": "rejected_1"
+                }
+            }
+        ]
+    },
+    "tasks": [{
+            "name": "union",
+            "source": "public.csd",
+            "params": {
+                "where": {
+                    "field": "csduid",
+                    "value": "@experiment:csds"
+                }
+            },
+			"output": "simulation_area"
+        }, {
+            "name": "within",
+            "source": "public.da",
+            "params": {
+                "table": "@step:1",
+                "join_field": "area_id"
+            }
+        }, {
+            "name": "centroid",
+            "source": "@step:2"
+        }, {
+            "name": "within",
+            "source": "public.hospitals",
+            "params": {
+                "table": "@step:1",
+                "join_field": "area_id"
+            }
+        }, {
+            "name": "set_values",
+            "loop": "@experiment:hospitals",
+            "source": "@step:4",
+            "params": {
+                "column": "rate",
+                "value": "@iterator:rate",
+                "use_quotes": false,
+                "where": {
+                    "field": "index",
+                    "value": "@iterator:id"
+                }
+            }
+        }, {
+            "name": "set_values",
+            "loop": "@experiment:hospitals",
+            "source": "@step:5",
+            "params": {
+                "column": "capacity",
+                "value": "@iterator:capacity",
+                "use_quotes": false,
+                "where": {
+                    "field": "index",
+                    "value": "@iterator:id"
+                }
+            },
+			"output": "hospitals"
+        }, {
+            "name": "closest",
+            "source": "@step:2",
+            "params": {
+                "table": "@step:6",
+				"field": "hospital",
+                "n": 3
+            },
+			"output": "emergency_areas"
+        }]
+}
+
+

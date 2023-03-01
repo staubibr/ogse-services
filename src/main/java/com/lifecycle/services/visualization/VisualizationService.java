@@ -1,114 +1,83 @@
 package com.lifecycle.services.visualization;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
+import java.io.InputStream;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.lifecycle.entities.metadata.Entities;
-import com.lifecycle.entities.metadata.Entity;
+import com.lifecycle.components.metadata.Inventory;
+import com.lifecycle.components.metadata.Entity;
 import com.lifecycle.components.io.Folder;
-import com.lifecycle.components.io.UuidFolder;
-import com.lifecycle.components.io.ZipFile;
 
 @Service
 public class VisualizationService {
-		
-	@Value("${app.folders.visualizations}")
-	private String APP_FOLDERS_VISUALIZATIONS;
 
-	@Value("${app.list.visualizations}")
-	private String APP_VISUALIZATIONS;
-		
+	public final Inventory inventory;
+	public final Folder folder;
+
     @Autowired
-	public VisualizationService() {
-
+	public VisualizationService(@Value("${app.list.visualizations}") String inventory,
+								@Value("${app.folders.visualizations}") String folder) throws IOException {
+		this.inventory = new Inventory(inventory);
+		this.folder = new Folder(folder);
 	}
-	
-    public Entities<Entity> Entities() throws JsonParseException, JsonMappingException, IOException {
-    	return new Entities<Entity>(APP_VISUALIZATIONS, Entity.class); 
-    }
-    
-    public File List() throws IOException {
-    	return new File(APP_VISUALIZATIONS);
-    }
-    
-    // TODO: Two almost identical methods just ot handle File vs MultipartFile.
-    public Entity Create(String name, String description, MultipartFile visualization, MultipartFile structure, MultipartFile messages, List<MultipartFile> data) throws Exception {
-    	Entities<Entity> visualizations = new Entities<Entity>(APP_VISUALIZATIONS, Entity.class); 
-		UuidFolder scratch = new UuidFolder(APP_FOLDERS_VISUALIZATIONS);
-		Entity entity = visualizations.Add(new Entity(scratch.uuid, name, description));
 
-		visualizations.Save();
-		scratch.copy(visualization, "visualization.json");
-		scratch.copy(structure, "structure.json");
-		scratch.copy(messages, "messages.log");
+    public Entity Create(String name, String description, Map<String, InputStream> files) throws Exception {
+		UUID uuid = this.folder.get_uuid();
+		Folder scratch = this.folder.create(uuid.toString());
 
-		for (MultipartFile f: data) scratch.copy(f);
-		
+		for (String f : files.keySet()) scratch.copy(files.get(f), f);
+
+		Entity entity = this.inventory.Add(new Entity(uuid, name, description));
+		this.inventory.Save();
+
 		return entity;
     }
 
-    public Entity Create(String name, String description, MultipartFile visualization, File structure, File messages, List<File> data) throws Exception {
-    	Entities<Entity> visualizations = new Entities<Entity>(APP_VISUALIZATIONS, Entity.class); 
-		UuidFolder scratch = new UuidFolder(APP_FOLDERS_VISUALIZATIONS);
-		Entity entity = visualizations.Add(new Entity(scratch.uuid, name, description));
-		
-		visualizations.Save();
-		scratch.copy(visualization, "visualization.json");
-		scratch.copy(structure, "structure.json");
-		scratch.copy(messages, "messages.log");
+	public Entity Create(String name, String description, List<MultipartFile> files) throws Exception {
+		Map<String, InputStream> f_map = new HashMap<>();
 
-		for (File f: data) scratch.copy(f);
-		
-		return entity;
+		for (MultipartFile f: files) f_map.put(f.getOriginalFilename(), f.getInputStream());
+
+		return this.Create(name, description, f_map);
+	}
+
+    public Entity Create(String name, String description, MultipartFile visualization, List<File> files) throws Exception {
+		Map<String, InputStream> f_map = new HashMap<>();
+
+		for (File f: files) f_map.put(f.getName(), new FileInputStream(f));
+
+		f_map.put(visualization.getOriginalFilename(), visualization.getInputStream());
+
+		return this.Create(name, description, f_map);
     }
-    
+
     public Entity Read(String uuid) throws Exception {
-		Entities<Entity> visualizations = Entities(); 
-    	
-		return visualizations.Get((e) -> e.getUuid().toString().equals(uuid));
+		return inventory.Get(uuid);
     }
-    
-    public List<File> ReadFiles(String uuid) throws IOException {
-    	Folder folder = new Folder(APP_FOLDERS_VISUALIZATIONS, uuid);
-    	
-    	return folder.files();
-    }
-    
-    public ZipFile ReadZipFile(String uuid) throws IOException {
-    	return new ZipFile(this.ReadFiles(uuid));
-    }
-    
-    public Entity Update(String uuid, String name, String description, Date created, MultipartFile visualization, MultipartFile structure, MultipartFile messages, List<MultipartFile> data) throws Exception {
-		Entities<Entity> visualizations = Entities(); 
-		Entity updated = visualizations.Update(new Entity(uuid, name, description, created));
-		Folder folder = new Folder(APP_FOLDERS_VISUALIZATIONS, uuid);
-		
-		visualizations.Save();
-    	
-    	if (visualization != null) folder.copy(visualization, "visualization.json");
-    	if (structure != null) folder.copy(structure, "structure.json");
-    	if (messages != null) folder.copy(messages, "messages.log");
 
-    	if (data != null) for (MultipartFile f: data) folder.copy(f);
-    	
+    public byte[] ReadFiles(String uuid) throws Exception {
+    	return this.folder.folder(uuid).zip();
+    }
+    
+    public Entity Update(String uuid, String name, String description, Date created, List<MultipartFile> files) throws Exception {
+		Entity updated = this.inventory.Update(new Entity(uuid, name, description, created));
+		this.inventory.Save();
+		this.folder.empty(uuid);
+
+		for (MultipartFile f: files) this.folder.folder(uuid).copy(f, f.getOriginalFilename());
+
     	return updated;
     }
 	
     public void Delete(String uuid) throws Exception {
-		Entities<Entity> visualizations = Entities(); 
-    	Folder folder = new Folder(APP_FOLDERS_VISUALIZATIONS, uuid);
-
-    	folder.delete();
-    	visualizations.Remove(uuid);
-    	visualizations.Save();
+		this.folder.delete(uuid);
+		this.inventory.Remove(uuid).Save();
     }
 }

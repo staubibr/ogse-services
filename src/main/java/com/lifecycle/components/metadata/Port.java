@@ -1,4 +1,4 @@
-package com.lifecycle.entities.metadata;
+package com.lifecycle.components.metadata;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;

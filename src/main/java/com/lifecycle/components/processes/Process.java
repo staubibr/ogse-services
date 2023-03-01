@@ -16,8 +16,8 @@ public abstract class Process {
 	}
 	
 	private int execute(ProcessBuilder pb) throws IOException, InterruptedException {
-		if (this.workspace != null) pb.directory(this.workspace.path.toFile());
-		
+		if (this.workspace != null) pb.directory(new File(this.workspace.path));
+
 		pb.redirectError(ProcessBuilder.Redirect.INHERIT);
 		pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
 

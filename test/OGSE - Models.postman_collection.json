@@ -1,0 +1,171 @@
+{
+	"info": {
+		"_postman_id": "3b1b781c-e8b0-4d26-8ee4-1f6f8289f359",
+		"name": "OGSE - Models",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5404621"
+	},
+	"item": [
+		{
+			"name": "Model - List",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/model/list",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"model",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Model - Description",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/model/21567c86-34f0-4f13-a6f0-ddc05ca45fe5",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"model",
+						"21567c86-34f0-4f13-a6f0-ddc05ca45fe5"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Model - File",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/model/21567c86-34f0-4f13-a6f0-ddc05ca45fe5/file",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"model",
+						"21567c86-34f0-4f13-a6f0-ddc05ca45fe5",
+						"file"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Model - New",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Model_1",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "Model_1 description",
+							"type": "text"
+						},
+						{
+							"key": "model",
+							"type": "file",
+							"src": "/D:/4. Development/ogse-services/test/model/model.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8082/api/model/",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"model",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Model - Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Model_1_Update",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "Model_1 description updated",
+							"type": "text"
+						},
+						{
+							"key": "model",
+							"type": "file",
+							"src": "/D:/4. Development/ogse-services/test/model/model - updated.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8082/api/model/d4764259-3429-4c8a-a689-4b9ded6df635",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"model",
+						"d4764259-3429-4c8a-a689-4b9ded6df635"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Model - Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/model/df57d6ac-d73b-4057-87ae-d3501062dc75",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"model",
+						"df57d6ac-d73b-4057-87ae-d3501062dc75"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

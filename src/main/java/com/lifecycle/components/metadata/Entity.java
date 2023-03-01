@@ -1,4 +1,4 @@
-package com.lifecycle.entities.metadata;
+package com.lifecycle.components.metadata;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -6,9 +6,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -60,10 +57,12 @@ public class Entity {
     	return this.getUuid().equals(m.getUuid());
     }
 	
-    public void update(Entity meta) {
+    public Entity update(Entity meta) {
     	if (meta.getName() != null) this.setName(meta.getName());
     	if (meta.getDescription() != null) this.setDescription(meta.getDescription());
     	if (meta.getCreated() != null) this.setCreated(meta.getCreated());
+
+		return this;
     }
     
 	public ObjectNode json() {

@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.models.lib</groupId>
-    <artifactId>LibraryOfModels</artifactId>
+    <artifactId>ogse-services</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>LibraryOfModels</name>
     <description>Demo project for Spring Boot</description>

@@ -1,5 +1,6 @@
 package com.lifecycle.services.simulation;
 
+import com.lifecycle.components.io.Folder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.lifecycle.components.io.ZipFile;
 import com.lifecycle.components.rest.Controller;
 import com.lifecycle.components.rest.FilesResponse;
 
@@ -29,19 +29,21 @@ public class SimulationController extends Controller {
         this.sService = sService;
     }
     
-    @PostMapping("/api/simulate")
-    public ResponseEntity<byte[]> simulate(@RequestPart("config") MultipartFile f_config,
+    @PostMapping("/api/simulation/execute")
+    public ResponseEntity<byte[]> simulate(@RequestPart("scenario") MultipartFile scenario,
     								   	   @RequestParam(value = "iterations", required = false) Long n_iterations,
     								   	   @RequestParam(value = "duration", required = false) Double n_duration) 
     								   			   throws Exception {    	
 
-    	ZipFile zf = this.sService.SimulateZip(f_config, n_iterations, n_duration);
-		
-    	return FilesResponse.build("simulation_results.zip", zf.toByteArray());
+        Folder output = this.sService.Execute(scenario, n_iterations, n_duration);
+        byte[] zipped = output.zip();
+        output.delete();
+
+    	return FilesResponse.build("simulation_results.zip", zipped);
     }
     
-	@GetMapping(path="/api/simulate", produces = MediaType.TEXT_HTML_VALUE)
-    public ModelAndView simulateHtml() throws Exception {
+	@GetMapping(path="/api/simulation/execute", produces = MediaType.TEXT_HTML_VALUE)
+    public ModelAndView simulateHtml() {
 		ModelAndView mv = new ModelAndView();
 		
         mv.setViewName("lifecycle/simulate");

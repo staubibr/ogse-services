@@ -1,0 +1,206 @@
+{
+	"info": {
+		"_postman_id": "1e50eba0-9df6-4c00-8355-3fa9f9973d46",
+		"name": "OGSE - Workflows",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "5404621"
+	},
+	"item": [
+		{
+			"name": "Workflow - List",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/workflow/list",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						"list"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow - Description",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/workflow/1963276b-fda0-4fce-8566-ca1393243a1a",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						"1963276b-fda0-4fce-8566-ca1393243a1a"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow - File",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8082/api/workflow/1963276b-fda0-4fce-8566-ca1393243a1a/file",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						"1963276b-fda0-4fce-8566-ca1393243a1a",
+						"file"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow - New",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Workflow_1",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "Workflow_1 description",
+							"type": "text"
+						},
+						{
+							"key": "workflow",
+							"type": "file",
+							"src": "/D:/4. Development/ogse-services/test/workflow/workflow.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8082/api/workflow/",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow - Update",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "Workflow_1_Update",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "Workflow_1 description updated",
+							"type": "text"
+						},
+						{
+							"key": "workflow",
+							"type": "file",
+							"src": "/D:/4. Development/ogse-services/test/workflow/workflow - updated.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8082/api/workflow/ce3ad775-c7b5-4223-86dd-e9ca37a8e728",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						"ce3ad775-c7b5-4223-86dd-e9ca37a8e728"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Workflow - Delete",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "localhost:8082/api/workflow/ce3ad775-c7b5-4223-86dd-e9ca37a8e728",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						"ce3ad775-c7b5-4223-86dd-e9ca37a8e728"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Execute",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "params",
+							"value": "{\n    \"csds\": [\"'2482030'\", \"'2482025'\", \"'2482015'\", \"'2482020'\", \"'2481017'\", \"'2482005'\", \"'3506008'\"],\n\t\"hospitals\": [{\n            \"id\": \"'4860'\",\n            \"capacity\": \"500\",\n            \"rate\": \"30\"\n        }, {\n            \"id\": \"'5658'\",\n            \"capacity\": \"400\",\n            \"rate\": \"60\"\n        }\n    ]\n}\n",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:8082/api/workflow/a9c067be-a38e-4155-8650-c610332212e2/execute",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"api",
+						"workflow",
+						"a9c067be-a38e-4155-8650-c610332212e2",
+						"execute"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

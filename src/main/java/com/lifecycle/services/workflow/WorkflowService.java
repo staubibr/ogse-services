@@ -2,117 +2,84 @@ package com.lifecycle.services.workflow;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lifecycle.entities.metadata.Entities;
-import com.lifecycle.entities.metadata.Entity;
+import com.lifecycle.components.metadata.Inventory;
+import com.lifecycle.components.metadata.Entity;
 import com.lifecycle.components.io.Folder;
-import com.lifecycle.components.io.UuidFolder;
-import com.lifecycle.components.io.ZipFile;
-import com.lifecycle.components.processes.PythonProcess;
+import com.lifecycle.components.processes.WorkflowProcess;
 
 @Service
 public class WorkflowService {
 
-	@Value("${app.process.workflows}")
-	private String PYTHON_POSTGRES;
-
-	@Value("${app.folders.workflows}")
-	private String APP_FOLDERS_WORKFLOWS;
-	
-	@Value("${app.folders.scratch}")
-	private String APP_FOLDERS_SCRATCH;
-
-	@Value("${app.list.workflows}")
-	private String APP_WORKFLOWS;
+	public final Inventory inventory;
+	public final Folder folder;
+	private final WorkflowProcess engine;
+	private final Folder scratch;
 
     @Autowired
-	public WorkflowService() {
-
+	public WorkflowService(@Value("${app.list.workflows}") String inventory,
+						   @Value("${app.folders.workflows}") String folder,
+						   @Value("${app.folders.scratch}") String scratch,
+						   @Value("${app.process.workflows}") String engine) throws IOException {
+		this.inventory = new Inventory(inventory);
+		this.folder = new Folder(folder);
+		this.scratch = new Folder(scratch);
+		this.engine = new WorkflowProcess(engine);
 	}
-	
-    public Entities<Entity> Entities() throws IOException {
-    	return new Entities<>(APP_WORKFLOWS, Entity.class);
-    }
-	
-    public File List() throws IOException {
-    	return new File(APP_WORKFLOWS);
-    }
-        
-    public Entity Create(String name, String description, MultipartFile workflow, List<MultipartFile> data) throws Exception {
-    	Entities<Entity> workflows = new Entities<>(APP_WORKFLOWS, Entity.class);
-		UuidFolder scratch = new UuidFolder(APP_FOLDERS_WORKFLOWS);
-		Entity entity = workflows.Add(new Entity(scratch.uuid, name, description));
-		
-		workflows.Save();
-		scratch.copy(workflow, "workflow.json");
-		
-		Folder data_folder = new Folder(scratch.path("data"));
-		
-		for (MultipartFile d: data) data_folder.copy(d);
-		
+
+    public Entity Create(String name, String description, MultipartFile workflow) throws Exception {
+		UUID uuid = this.folder.get_uuid();
+		this.folder.create(uuid.toString()).copy(workflow, "workflow.json");
+
+		Entity entity = this.inventory.Add(new Entity(uuid, name, description));
+		this.inventory.Save();
+
 		return entity;
     }
     
     public Entity Read(String uuid) throws Exception {
-		Entities<Entity> workflows = Entities(); 
-    	
-		return workflows.Get((e) -> e.getUuid().toString().equals(uuid));
+		return this.inventory.Get(uuid);
     }
     
     public File ReadFile(String uuid) throws Exception {
-    	Folder folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid);
-    	
-    	return folder.file("workflow.json");
+		return this.folder.file(uuid, "workflow.json");
     }
 
-	public Entity Update(String uuid, String name, String description, Date created, MultipartFile workflow, List<MultipartFile> data) throws Exception {
-		Entities<Entity> workflows = Entities(); 
-		
-		Entity updated = workflows.Update(new Entity(uuid, name, description, created));
-		Folder folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid);
-    	
-    	workflows.Save();
+	public Entity Update(String uuid, String name, String description, Date created, MultipartFile workflow) throws Exception {
+		Entity updated = this.inventory.Update(new Entity(uuid, name, description, created));
+		this.inventory.Save();
 
-    	if (workflow != null) folder.copy(workflow, "workflow.json");
-    	
-    	if (data != null) {
-        	Folder data_folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid, "data");
-        	        	
-        	data_folder.delete();
-        	
-        	data_folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid, "data");
+		if (workflow != null) this.folder.folder(uuid).copy(workflow, "workflow.json");
 
-    		for (MultipartFile d: data) data_folder.copy(d);
-    	} 
-    	
-    	return updated;
+		return updated;
     }
 	
     public void Delete(String uuid) throws Exception {
-		Entities<Entity> workflows = Entities(); 
-    	Folder folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid);
-
-    	folder.delete();
-    	workflows.Remove(uuid);
-    	workflows.Save();
+		this.folder.delete(uuid);
+		this.inventory.Remove(uuid).Save();
     }
 
-	public File Execute(Folder scratch, String uuid, JsonNode params) throws Exception {
-		PythonProcess p = new PythonProcess(PYTHON_POSTGRES);
+	public Folder Execute(String uuid, String experiment) throws Exception {
+		Folder scratch = this.scratch.create_uuid();
 
-		Folder folder = new Folder(APP_FOLDERS_WORKFLOWS, uuid);
+		if (experiment != null) scratch.write("experiment.json", experiment);
 
-		return p.execute(scratch, folder, params);
+		scratch.copy(this.folder.file(uuid, "workflow.json"));
+
+		this.engine.execute(scratch);
+
+		if (experiment != null) scratch.delete("experiment.json");
+
+		scratch.delete("workflow.json");
+
+		return scratch;
 
 		// TODO: Just so I don't forget, these are the function calls to publish to GeoServer.
 		// TODO: Code doesn't belong here though.
@@ -121,18 +88,5 @@ public class WorkflowService {
 		// GeoServer.post_feature_type(schema, "oil_rings");
 		// GeoServer.post_feature_type(schema, "grid_cells");
 		// GeoServer.delete_workspace(schema);
-	}
-
-	public byte[] Execute(String uuid, String s_params) throws Exception {
-		UuidFolder scratch = new UuidFolder(APP_FOLDERS_SCRATCH);
-		ObjectMapper mapper = new ObjectMapper();
-		JsonNode params = mapper.readTree(s_params);
-
-		File file = this.Execute(scratch, uuid, params);
-		byte[] content = Files.readAllBytes(file.toPath());
-
-		scratch.delete();
-
-		return content;
 	}
 }
