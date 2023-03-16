@@ -1,0 +1,104 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-3.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link th:href="@{/static/css/main.css}" rel="stylesheet"/>
+
+    <script type="text/javascript" th:src="@{/static/js/util.js}"></script>
+
+    <script th:inline="javascript">
+            function get_workflow_data() {
+				const data = new FormData();
+
+				read_value("experiment", data, "experiment", true);
+
+				return data;
+            }
+
+            function get_simulation_data() {
+				const data = new FormData();
+
+				read_value("duration", data, "duration", true);
+
+				return data;
+            }
+
+			function get_visualization_data() {
+				const data = new FormData();
+
+				read_files("visualization", data, "file", true);
+
+				return data;
+			}
+
+			async function on_click(uuid) {
+	            elem("output").innerHTML = "";
+	            elem("output").className = "output code hidden";
+
+                var url_workspace = "http://localhost:8082/api/workspace/" + uuid;
+			    var url_workflow = url_workspace + "/workflow/" + elem("workflow").value + "/execute";
+			    var url_simulate = url_workspace + "/simulation/execute";
+			    var url_visualization = url_workspace + "/visualization";
+
+				try {
+	                elem("output").className = "output code";
+	                elem("output").innerHTML += "Executing workflow... ";
+					await post(url_workflow, get_workflow_data());
+	                elem("output").innerHTML += "done!<br>";
+
+	                elem("output").innerHTML += "Running simulation... ";
+					await post(url_simulate, get_simulation_data());
+	                elem("output").innerHTML += "done!<br>";
+
+	                elem("output").innerHTML += "Uploading visualization... ";
+					await post(url_visualization, get_visualization_data());
+	                elem("output").innerHTML += "done!<br>";
+
+                    var href = "http://localhost/app-embed/index.html?ogse=" + uuid;
+
+	                elem("output").innerHTML += "Viewer is ready: ";
+	                elem("output").innerHTML += "<a class='link' href='" + href + "' target='_blank'>show in viewer</a>";
+				}
+				catch (error) {
+					alert(error.message);
+				}
+			}
+		</script>
+</head>
+
+<body>
+<div th:replace="header::header"></div>
+
+<main>
+    <h1 th:text="'Workspace: ' + ${uuid}"> </h1>
+    <div class="row">
+        <label>Workflow: </label>
+        <select id="workflow" style="width:200px;">
+            <option th:each="wf : ${workflows}" th:value="${wf.getUuid()}" th:text="${wf.getName()}"></option>
+        </select>
+    </div>
+
+    <div class="row">
+        <label>Experiment (JSON): </label>
+    </div>
+
+    <div class="row">
+        <textarea id="experiment">{ }</textarea>
+    </div>
+
+    <div class="row">
+        <label>Duration: </label><input id="duration" type="numeric" value="50" />
+    </div>
+
+    <div class="row">
+        <label>Visualization file: </label><input id="visualization" type="file" />
+    </div>
+
+    <div class="row">
+        <button id="execute" th:attr="onclick=|on_click('${uuid}')|">Execute</button>
+    </div>
+
+    <div id="output" class="output code hidden"></div>
+
+</main>
+</body>
+</html>

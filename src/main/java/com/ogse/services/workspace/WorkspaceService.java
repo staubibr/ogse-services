@@ -87,4 +87,10 @@ public class WorkspaceService {
 
 		this.simulator.execute(scenario, iterations, duration, f_workspace);
 	}
+
+	public void UploadVisualization(String workspace_uuid, MultipartFile file) throws Exception {
+		Folder f_workspace = this.workspace_folder.folder(workspace_uuid);
+
+		f_workspace.copy(file, "visualization.json");
+	}
 }

@@ -85,13 +85,21 @@ public class WorkspaceController extends Controller {
 		return this.wService.inventory.Get(workspace_uuid).json();
 	}
 
-	@PostMapping("/api/workspace/{workspace_uuid}/simulation/execute")
-	public ObjectNode simulation_execute(@PathVariable String workspace_uuid,
-							   @RequestParam(value = "iterations", required = false) Long n_iterations,
-							   @RequestParam(value = "duration", required = false) Double n_duration) throws Exception {
+    @PostMapping("/api/workspace/{workspace_uuid}/simulation/execute")
+    public ObjectNode simulation_execute(@PathVariable String workspace_uuid,
+                                         @RequestParam(value = "iterations", required = false) Long n_iterations,
+                                         @RequestParam(value = "duration", required = false) Double n_duration) throws Exception {
 
-		this.wService.ExecuteSimulation(workspace_uuid, n_iterations, n_duration);
+        this.wService.ExecuteSimulation(workspace_uuid, n_iterations, n_duration);
 
-		return this.wService.inventory.Get(workspace_uuid).json();
-	}
+        return this.wService.inventory.Get(workspace_uuid).json();
+    }
+    @PostMapping("/api/workspace/{workspace_uuid}/visualization")
+    public ObjectNode visualization(@PathVariable String workspace_uuid,
+                                    @RequestPart MultipartFile file) throws Exception {
+
+        this.wService.UploadVisualization(workspace_uuid, file);
+
+        return this.wService.inventory.Get(workspace_uuid).json();
+    }
 }

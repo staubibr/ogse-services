@@ -38,8 +38,10 @@ function show_output(id, content) {
 	elem(id).className = "output code";
 }
 
-function post(url, data) {
-	return fetch(url, { method: 'post', body: data });
+async function post(url, data) {
+	var response = await fetch(url, { method: 'post', body: data });
+
+	if (!response.ok) throw new Error('Post request returned an error.');
 }
 
 function _delete(url, uuid) {
@@ -55,7 +57,7 @@ function read_files(id, data, name, mandatory) {
 	
 	if (files.length == 0 && mandatory) throw new Error("Parameter " + name + " is mandatory.");
 	
-	files.forEach(f => data.append(name, f)) ;
+	files.forEach(f => data.append(name, f)) ;
 }
 
 function read_value(id, data, name, mandatory) {
