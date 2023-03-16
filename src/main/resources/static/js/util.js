@@ -13,12 +13,14 @@ function download(name, blob) {
 }
 
 function get_blob(response) {
+    debugger;
 	if (response.ok) return response.blob();
 	
 	else return get_error(response);
 }
 
 function get_json(response) {
+    debugger;
 	if (response.ok) return response.json();
 	
 	else return get_error(response);
@@ -42,6 +44,8 @@ async function post(url, data) {
 	var response = await fetch(url, { method: 'post', body: data });
 
 	if (!response.ok) throw new Error('Post request returned an error.');
+
+	return response;
 }
 
 function _delete(url, uuid) {

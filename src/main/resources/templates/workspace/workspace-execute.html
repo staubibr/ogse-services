@@ -42,15 +42,15 @@
 				try {
 	                elem("output").className = "output code";
 	                elem("output").innerHTML += "Executing workflow... ";
-					await post(url_workflow, get_workflow_data());
+	                await post(url_workflow, get_workflow_data());
 	                elem("output").innerHTML += "done!<br>";
 
 	                elem("output").innerHTML += "Running simulation... ";
-					await post(url_simulate, get_simulation_data());
+	                await post(url_simulate, get_simulation_data());
 	                elem("output").innerHTML += "done!<br>";
 
 	                elem("output").innerHTML += "Uploading visualization... ";
-					await post(url_visualization, get_visualization_data());
+	                await post(url_visualization, get_visualization_data());
 	                elem("output").innerHTML += "done!<br>";
 
                     var href = "http://localhost/app-embed/index.html?ogse=" + uuid;

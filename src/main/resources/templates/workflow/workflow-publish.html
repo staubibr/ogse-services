@@ -17,11 +17,12 @@
 				return data;
 			}
 		
-			function on_click(url) {			
-				try {					
-					post(url, get_data()).then(response => get_json(response))
-							   			 .then(json => show_output("output", JSON.stringify(json)))
-								   		 .catch(error => handle_error(error));
+			async function on_click(url) {
+				try {
+					var response = await post(url, get_data());
+					var json = await response.json();
+
+					show_output("output", JSON.stringify(json));
 				}
 				catch (error) {
 					alert(error.message);
