@@ -172,7 +172,7 @@
 			"response": []
 		},
 		{
-			"name": "Execute",
+			"name": "Workflow - Execute",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -180,7 +180,7 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "params",
+							"key": "experiment",
 							"value": "{\n    \"csds\": [\"'2482030'\", \"'2482025'\", \"'2482015'\", \"'2482020'\", \"'2481017'\", \"'2482005'\", \"'3506008'\"],\n\t\"hospitals\": [{\n            \"id\": \"'4860'\",\n            \"capacity\": \"500\",\n            \"rate\": \"30\"\n        }, {\n            \"id\": \"'5658'\",\n            \"capacity\": \"400\",\n            \"rate\": \"60\"\n        }\n    ]\n}\n",
 							"type": "text"
 						}

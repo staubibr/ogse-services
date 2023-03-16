@@ -1,25 +1,25 @@
 {
 	"info": {
 		"_postman_id": "73bd2df8-0552-47e4-a9c4-881eee176720",
-		"name": "OGSE - Visualizations",
+		"name": "OGSE - Workspaces",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "5404621"
 	},
 	"item": [
 		{
-			"name": "Visualization - List",
+			"name": "Workspace - List",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8082/api/visualization/list",
+					"raw": "localhost:8082/api/workspace/list",
 					"host": [
 						"localhost"
 					],
 					"port": "8082",
 					"path": [
 						"api",
-						"visualization",
+						"workspace",
 						"list"
 					]
 				}
@@ -27,19 +27,19 @@
 			"response": []
 		},
 		{
-			"name": "Visualization - Description",
+			"name": "Workspace - Description",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8082/api/visualization/6211660f-28ed-487e-a691-26e5ddcc55d3",
+					"raw": "localhost:8082/api/workspace/6211660f-28ed-487e-a691-26e5ddcc55d3",
 					"host": [
 						"localhost"
 					],
 					"port": "8082",
 					"path": [
 						"api",
-						"visualization",
+						"workspace",
 						"6211660f-28ed-487e-a691-26e5ddcc55d3"
 					]
 				}
@@ -47,19 +47,19 @@
 			"response": []
 		},
 		{
-			"name": "Visualization - File",
+			"name": "Workspace - File",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:8082/api/visualization/06297bfa-221c-4e57-921f-514621c38f7a",
+					"raw": "localhost:8082/api/workspace/06297bfa-221c-4e57-921f-514621c38f7a",
 					"host": [
 						"localhost"
 					],
 					"port": "8082",
 					"path": [
 						"api",
-						"visualization",
+						"workspace",
 						"06297bfa-221c-4e57-921f-514621c38f7a"
 					]
 				}
@@ -67,7 +67,7 @@
 			"response": []
 		},
 		{
-			"name": "Visualization - New",
+			"name": "Workspace - New",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -76,36 +76,36 @@
 					"formdata": [
 						{
 							"key": "name",
-							"value": "Visualization_1",
+							"value": "Workspace_1",
 							"type": "text"
 						},
 						{
 							"key": "description",
-							"value": "Visualization_1 description",
+							"value": "Workspace_1 description",
 							"type": "text"
 						},
 						{
 							"key": "files",
 							"type": "file",
 							"src": [
-								"/D:/4. Development/ogse-services/test/visualization/emergency_areas.geojson",
-								"/D:/4. Development/ogse-services/test/visualization/hospitals.geojson",
-								"/D:/4. Development/ogse-services/test/visualization/metadata.json",
-								"/D:/4. Development/ogse-services/test/visualization/scenario.json",
-								"/D:/4. Development/ogse-services/test/visualization/visualization.json"
+								"/D:/4. Development/ogse-services/test/workspace/emergency_areas.geojson",
+								"/D:/4. Development/ogse-services/test/workspace/hospitals.geojson",
+								"/D:/4. Development/ogse-services/test/workspace/metadata.json",
+								"/D:/4. Development/ogse-services/test/workspace/scenario.json",
+								"/D:/4. Development/ogse-services/test/workspace/visualization.json"
 							]
 						}
 					]
 				},
 				"url": {
-					"raw": "localhost:8082/api/visualization/",
+					"raw": "localhost:8082/api/workspace/",
 					"host": [
 						"localhost"
 					],
 					"port": "8082",
 					"path": [
 						"api",
-						"visualization",
+						"workspace",
 						""
 					]
 				}
@@ -113,7 +113,7 @@
 			"response": []
 		},
 		{
-			"name": "Visualization - Update",
+			"name": "Workspace - Update",
 			"request": {
 				"method": "PUT",
 				"header": [],
@@ -122,30 +122,30 @@
 					"formdata": [
 						{
 							"key": "name",
-							"value": "Visualization_1_Update",
+							"value": "Workspace_1_Update",
 							"type": "text"
 						},
 						{
 							"key": "description",
-							"value": "Visualization_1 description updated",
+							"value": "Workspace_1 description updated",
 							"type": "text"
 						},
 						{
 							"key": "files",
 							"type": "file",
-							"src": "/D:/4. Development/ogse-services/test/visualization/visualization.json"
+							"src": "/D:/4. Development/ogse-services/test/workspace/visualization.json"
 						}
 					]
 				},
 				"url": {
-					"raw": "localhost:8082/api/visualization/bb61e5e4-c235-4270-88e2-9ec399fe0f2b",
+					"raw": "localhost:8082/api/workspace/bb61e5e4-c235-4270-88e2-9ec399fe0f2b",
 					"host": [
 						"localhost"
 					],
 					"port": "8082",
 					"path": [
 						"api",
-						"visualization",
+						"workspace",
 						"bb61e5e4-c235-4270-88e2-9ec399fe0f2b"
 					]
 				}
@@ -153,19 +153,19 @@
 			"response": []
 		},
 		{
-			"name": "Visualization - Delete",
+			"name": "Workspace - Delete",
 			"request": {
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "localhost:8082/api/visualization/bb61e5e4-c235-4270-88e2-9ec399fe0f2b",
+					"raw": "localhost:8082/api/workspace/bb61e5e4-c235-4270-88e2-9ec399fe0f2b",
 					"host": [
 						"localhost"
 					],
 					"port": "8082",
 					"path": [
 						"api",
-						"visualization",
+						"workspace",
 						"bb61e5e4-c235-4270-88e2-9ec399fe0f2b"
 					]
 				}

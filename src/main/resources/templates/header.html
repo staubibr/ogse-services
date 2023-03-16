@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Header Fragment</title>
+  </head>
+  <body>
+    <header th:fragment="header">
+      <div class="ribbon">
+        <a href="http://localhost:8082/api/model/list">MODELS</a>
+        <a href="http://localhost:8082/api/workflow/list">WORKFLOWS</a>
+        <a href="http://localhost:8082/api/workspace/list">WORKSPACES</a>
+        <a href="http://localhost:8082/api/simulation/execute">SIMULATION</a>
+      </div>
+    </header>
+  </body>
+</html>
