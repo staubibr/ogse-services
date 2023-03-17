@@ -6,6 +6,22 @@
     <script type="text/javascript" th:src="@{/static/js/util.js}"></script>
 
     <script th:inline="javascript">
+            async function on_load(uuid) {
+                var url = "http://localhost:8082/api/workspace/" + uuid + "/file/";
+                var workspace = await get_json(url + "workspace.json");
+
+                if (workspace.step > 0) {
+                    var experiment = await get_json(url + "experiment.json");
+
+                    elem("workflow").value = workspace.workflow;
+                    elem("experiment").value = JSON.stringify(experiment, null, 4);
+                }
+
+                if (workspace.step > 1) elem("duration").value = workspace.duration;
+
+                if (workspace.has_visualization) show_viewer(uuid);
+            }
+
             function get_workflow_data() {
 				const data = new FormData();
 
@@ -49,23 +65,34 @@
 	                await post(url_simulate, get_simulation_data());
 	                elem("output").innerHTML += "done!<br>";
 
-	                elem("output").innerHTML += "Uploading visualization... ";
-	                await post(url_visualization, get_visualization_data());
-	                elem("output").innerHTML += "done!<br>";
+                    if (elem("visualization").files.length > 0) {
+                        elem("output").innerHTML += "Uploading visualization... ";
+                        await post(url_visualization, get_visualization_data());
+                        elem("output").innerHTML += "done!<br>";
+                    }
 
-                    var href = "http://localhost/app-embed/index.html?ogse=" + uuid;
+                    var workspace = await get_json(url_workspace + "/file/workspace.json");
 
-	                elem("output").innerHTML += "Viewer is ready: ";
-	                elem("output").innerHTML += "<a class='link' href='" + href + "' target='_blank'>show in viewer</a>";
+                    if (workspace.has_visualization) show_viewer(uuid);
+
+                    else elem("output").innerHTML += "Visualization file missing, cannot show viewer.";
 				}
 				catch (error) {
 					alert(error.message);
 				}
 			}
+
+			function show_viewer(uuid) {
+                var href = "http://localhost/app-embed/index.html?ogse=" + uuid;
+
+	            elem("output").className = "output code";
+                elem("output").innerHTML += "Viewer is ready: ";
+                elem("output").innerHTML += "<a class='link' href='" + href + "' target='_blank'>show in viewer</a>";
+			}
 		</script>
 </head>
 
-<body>
+<body th:attr="onload=|on_load('${uuid}')|">
 <div th:replace="header::header"></div>
 
 <main>

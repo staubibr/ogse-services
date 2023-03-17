@@ -1,5 +1,6 @@
 package com.ogse.services.workspace;
 
+import java.io.File;
 import java.util.Date;
 import java.util.List;
 
@@ -46,17 +47,24 @@ public class WorkspaceController extends Controller {
 	}
 
 	@GetMapping(path="/api/workspace/{uuid}/file", produces=MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<byte[]> getFile(@PathVariable String uuid) throws Exception {
-    	byte[] zipped = this.wService.ReadFiles(uuid);
+	public ResponseEntity<byte[]> getFile(@PathVariable String uuid) throws Exception {
+		byte[] zipped = this.wService.ReadFiles(uuid);
 
-    	return FilesResponse.build("workspace.zip", zipped);
+		return FilesResponse.build("workspace.zip", zipped);
+	}
+
+	@GetMapping(path="/api/workspace/{uuid}/file/{name}", produces=MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<byte[]> getFile(@PathVariable String uuid,
+										  @PathVariable String name) throws Exception {
+		File file = this.wService.GetFile(uuid, name);
+
+		return FilesResponse.build(file);
 	}
 
 	@PostMapping(path="/api/workspace", consumes={ MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE })
-    public ObjectNode post(@RequestPart MultipartFile file,
-						   @RequestParam String name,
+    public ObjectNode post(@RequestParam String name,
 						   @RequestParam(required = false) String description) throws Exception {
-    	return this.wService.Create(name, description, file).json();
+    	return this.wService.Create(name, description).json();
     }
 
 	@PutMapping(path="/api/workspace/{uuid}")

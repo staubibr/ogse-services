@@ -9,6 +9,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ogse.components.workspace.Workspace;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +37,28 @@ public class Folder {
 
 	public Folder write(String name, String content) throws IOException {
 		return this.write(name, content.getBytes());
+	}
+
+	public Folder write(String name, Object content) throws IOException {
+		ObjectMapper om = new ObjectMapper();
+
+		om.writeValue(Paths.get(this.path, name).toFile(), content);
+
+		return this;
+	}
+
+	public <T> T read(String name, Class<T> type) throws IOException {
+		Path p = Paths.get(this.path, name);
+		ObjectMapper om = new ObjectMapper();
+
+		return om.readValue(p.toFile(), type);
+	}
+
+	public Workspace workspace() throws IOException {
+		Path p = Paths.get(this.path, "workspace.json");
+		ObjectMapper om = new ObjectMapper();
+
+		return om.readValue(p.toFile(), Workspace.class);
 	}
 
 	public Folder create(String name) throws IOException {

@@ -8,6 +8,7 @@ import java.util.*;
 
 import com.ogse.components.processes.SimulationProcess;
 import com.ogse.components.processes.WorkflowProcess;
+import com.ogse.components.workspace.Workspace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,9 @@ public class WorkspaceService {
 		this.simulator = new SimulationProcess(simulator);
 	}
 
-    public Entity Create(String name, String description, MultipartFile workspace) throws Exception {
+    public Entity Create(String name, String description) throws Exception {
 		UUID uuid = this.workspace_folder.get_uuid();
-		this.workspace_folder.create(uuid.toString()).copy(workspace, "workspace.json");
+		this.workspace_folder.create(uuid.toString()).write("workspace.json", new Workspace());
 
 		Entity entity = this.inventory.Add(new Entity(uuid, name, description));
 		this.inventory.Save();
@@ -79,6 +80,8 @@ public class WorkspaceService {
 		File f_experiment = f_workspace.write("experiment.json", experiment).file("experiment.json");
 
 		this.engine.execute(f_workflow, f_experiment, f_workspace);
+
+		f_workspace.workspace().update(Workspace.Step.WORKFLOW, workflow_uuid).write(f_workspace);
 	}
 
 	public void ExecuteSimulation(String workspace_uuid, Long iterations, Double duration) throws Exception {
@@ -86,11 +89,20 @@ public class WorkspaceService {
 		File scenario = f_workspace.file("scenario.json");
 
 		this.simulator.execute(scenario, iterations, duration, f_workspace);
+
+		f_workspace.workspace().update(Workspace.Step.SIMULATION, iterations, duration).write(f_workspace);
 	}
 
 	public void UploadVisualization(String workspace_uuid, MultipartFile file) throws Exception {
 		Folder f_workspace = this.workspace_folder.folder(workspace_uuid);
 
 		f_workspace.copy(file, "visualization.json");
+		f_workspace.workspace().update(true).write(f_workspace);
+	}
+
+	public File GetFile(String workspace_uuid, String name) throws Exception {
+		Folder f_workspace = this.workspace_folder.folder(workspace_uuid);
+
+		return f_workspace.file(name);
 	}
 }

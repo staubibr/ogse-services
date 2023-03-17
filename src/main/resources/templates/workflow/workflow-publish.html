@@ -19,6 +19,8 @@
 		
 			async function on_click(url) {
 				try {
+					elem("output").innerHTML = "";
+
 					var response = await post(url, get_data());
 					var json = await response.json();
 

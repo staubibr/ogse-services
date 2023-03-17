@@ -9,10 +9,6 @@
 			function get_data() {
 				const data = new FormData();
 
-				// read_files("file", data, "file", true);
-				// TODO: Temporary until the workspace file is useful
-				data.append("file", new Blob(["{}"], {type: 'text/plain'}));
-
 				read_value("name", data, "name", true);
 				read_value("description", data, "description", true);
 				
@@ -21,6 +17,8 @@
 		
 			async function on_click(url) {
 				try {
+					elem("output").innerHTML = "";
+
 					var response = await post(url, get_data());
 					var json = await response.json();
 
@@ -47,10 +45,6 @@
 				<label>Description: </label><input id="description" type="text" />
 			</div>
 
-			<!--div class="row">
-				<label>Workspace file: </label><input id="file" type="file" />
-			</div-->
-			
 			<div class="row">
 				<button id="publish" th:attr="onclick=|on_click('http://localhost:8082/api/workspace')|">Publish</button>
 			</div>
