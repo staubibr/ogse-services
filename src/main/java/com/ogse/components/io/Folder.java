@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -17,10 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class Folder {
 
-	public String path;
+	public Path path;
 	
 	public Folder(String path) {
-		this.path = path;
+		this.path = Paths.get(path);
 	}
 
 	public Folder(String first, String ...more) {
@@ -28,7 +30,8 @@ public class Folder {
 	}
 
 	public Folder write(String name, byte[] content) throws IOException {
-		Path p = Paths.get(this.path, name);
+		Path p = this.path.resolve(name);
+		// Path p = Paths.get(this.path, name);
 
 		Files.write(p, content);
 
@@ -42,27 +45,27 @@ public class Folder {
 	public Folder write(String name, Object content) throws IOException {
 		ObjectMapper om = new ObjectMapper();
 
-		om.writeValue(Paths.get(this.path, name).toFile(), content);
+		om.writeValue(this.path.resolve(name).toFile(), content);
 
 		return this;
 	}
 
 	public <T> T read(String name, Class<T> type) throws IOException {
-		Path p = Paths.get(this.path, name);
+		Path p = this.path.resolve(name);
 		ObjectMapper om = new ObjectMapper();
 
 		return om.readValue(p.toFile(), type);
 	}
 
 	public Workspace workspace() throws IOException {
-		Path p = Paths.get(this.path, "workspace.json");
+		Path p = this.path.resolve("workspace.json");
 		ObjectMapper om = new ObjectMapper();
 
 		return om.readValue(p.toFile(), Workspace.class);
 	}
 
 	public Folder create(String name) throws IOException {
-		Path p = Paths.get(this.path, name);
+		Path p = this.path.resolve(name);
 		File f = new File(p.toString());
 
 		if (f.exists()) throw new IOException("Cannot create folder " + name + ", it already exists.");
@@ -87,13 +90,13 @@ public class Folder {
 	}
 
 	public boolean exists(String... file_name) {
-		File f = Paths.get(this.path, file_name).toFile();
+		File f = Paths.get(this.path.toString(), file_name).toFile();
 
 		return f.exists();
 	}
 
 	public Folder copy(InputStream f, String file_name) throws IOException {
-		java.nio.file.Files.copy(f, Paths.get(path, file_name), StandardCopyOption.REPLACE_EXISTING);
+		java.nio.file.Files.copy(f, this.path.resolve(file_name), StandardCopyOption.REPLACE_EXISTING);
 
 		f.close();
 
@@ -117,7 +120,7 @@ public class Folder {
 	}
 
 	public Folder delete(String... file_names) throws IOException {
-		File f = Paths.get(this.path, file_names).toFile();
+		File f = Paths.get(this.path.toString(), file_names).toFile();
 
 		FileSystemUtils.deleteRecursively(Objects.requireNonNull(f, "Folder requested does not exist."));
 
@@ -125,7 +128,7 @@ public class Folder {
 	}
 
 	public Folder delete() throws IOException {
-		File f = Paths.get(this.path).toFile();
+		File f = this.path.toFile();
 
 		FileSystemUtils.deleteRecursively(Objects.requireNonNull(f, "Folder requested does not exist."));
 
@@ -134,7 +137,7 @@ public class Folder {
 
 	@SuppressWarnings("UnusedReturnValue")
 	public Folder empty(String... file_names) throws IOException {
-		File f = Paths.get(this.path, file_names).toFile();
+		File f = Paths.get(this.path.toString(), file_names).toFile();
 
 		FileUtils.cleanDirectory(f);
 
@@ -142,7 +145,7 @@ public class Folder {
 	}
 
 	public Folder empty() throws IOException {
-		File f = Paths.get(this.path).toFile();
+		File f = this.path.toFile();
 
 		FileUtils.cleanDirectory(f);
 
@@ -150,36 +153,35 @@ public class Folder {
 	}
 
 	public List<File> files() {
-		File f = Paths.get(this.path).toFile();
+		File f = this.path.toFile();
 
 		return new ArrayList<>(Arrays.asList(Objects.requireNonNull(f.listFiles(), "Folder requested does not exist.")));
 	}
 
 	public List<File> files(String ... file_names) {
-		File f = Paths.get(this.path, file_names).toFile();
+		File f = Paths.get(this.path.toString(), file_names).toFile();
 
 		return new ArrayList<>(Arrays.asList(Objects.requireNonNull(f.listFiles(), "Folder requested does not exist.")));
 	}
 
 	public File file(String... file_name) throws Exception {
-		File f = Paths.get(this.path, file_name).toFile();
+		File f = Paths.get(this.path.toString(), file_name).toFile();
 
 		return Objects.requireNonNull(f, "File requested does not exist.");
 	}
 	public Folder folder(String... folder_name) throws Exception {
-		return new Folder(Paths.get(this.path, folder_name).toString());
+		return new Folder(Paths.get(this.path.toString(), folder_name).toString());
 	}
 
-	public byte[] zip(List<File> files) throws IOException {
+	public byte[] zip(List<Path> paths) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ZipOutputStream zos = new ZipOutputStream(baos);
 
-		for (File file : files) {
-			FileInputStream fis = new FileInputStream(file);
-			ZipEntry entry = new ZipEntry(file.getName());
+		for (Path p : paths) {
+			ZipEntry entry = new ZipEntry(this.path.relativize(p).toString());
 
 			zos.putNextEntry(entry);
-			zos.write(fis.readAllBytes());
+			Files.copy(p, zos);
 			zos.closeEntry();
 		}
 
@@ -189,6 +191,15 @@ public class Folder {
 	}
 
 	public byte[] zip() throws IOException {
-		return this.zip(this.files());
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ZipOutputStream zos = new ZipOutputStream(baos);
+		List<Path> files;
+
+		try (Stream<Path> walk = Files.walk(this.path)) {
+			files = walk.filter(path -> !Files.isDirectory(path))
+						.collect(Collectors.toList());
+		}
+
+		return this.zip(files);
 	}
 }

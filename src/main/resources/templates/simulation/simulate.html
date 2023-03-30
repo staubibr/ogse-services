@@ -9,7 +9,7 @@
 			function get_data() {				
 				const data = new FormData();
 				
-				read_files("file", data, "config", true);
+				read_files("scenario", data, "scenario", true);
 				read_value("iterations", data, "iterations", false);
 				read_value("duration", data, "duration", false);
 				
@@ -37,7 +37,7 @@
 			<h1>Simulate model</h1>
 			
 			<div class="row">
-				<label>Scenario file: </label><input id="file" type="file" />
+				<label>Scenario file: </label><input id="scenario" type="file" />
 			</div>
 			
 			<div class="row">
@@ -49,7 +49,7 @@
 			</div>
 			
 			<div class="row">
-				<button id="simulate" th:attr="onclick=|on_click('http://localhost:8082/api/simulate')|">Simulate</button>
+				<button id="simulate" th:attr="onclick=|on_click('http://localhost:8082/api/simulation/execute')|">Simulate</button>
 			</div>
 		</main>
 	</body>

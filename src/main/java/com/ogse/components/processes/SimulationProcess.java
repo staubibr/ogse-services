@@ -14,11 +14,11 @@ public class SimulationProcess extends Process {
 	public void execute(File scenario, Long iterations, Double duration, Folder output) throws Exception {
 		int exit;
 
-		if (iterations != null) exit = this.execute(this.tool.toString(), scenario.toString(), output.path, iterations.toString());
+		if (iterations != null) exit = this.execute(this.tool.toString(), scenario.toString(), output.path.toString(), iterations.toString());
 
-		else if (duration != null) exit = this.execute(this.tool.toString(), scenario.toString(), output.path, duration.toString());
+		else if (duration != null) exit = this.execute(this.tool.toString(), scenario.toString(), output.path.toString(), duration.toString());
 		
-		else exit = this.execute(this.tool.toString(), scenario.toString(), output.path);
+		else exit = this.execute(this.tool.toString(), scenario.toString(), output.path.toString());
 
 		if (exit != 0) throw new Exception("Unable to execute the simulation.");
 	}

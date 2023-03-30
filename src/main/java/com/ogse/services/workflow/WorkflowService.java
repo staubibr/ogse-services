@@ -70,11 +70,11 @@ public class WorkflowService {
 		// TODO: experiment should be nullable
 		Folder f_scratch = this.scratch.create_uuid();
 		File f_workflow = this.folder.file(uuid, "workflow.json");
-		File f_experiment = scratch.write("experiment.json", experiment).file("experiment.json");
+		File f_experiment = f_scratch.write("experiment.json", experiment).file("experiment.json");
 
 		this.engine.execute(f_workflow, f_experiment, f_scratch);
 
-		return scratch;
+		return f_scratch;
 
 		// TODO: Just so I don't forget, these are the function calls to publish to GeoServer.
 		// TODO: Code doesn't belong here though.

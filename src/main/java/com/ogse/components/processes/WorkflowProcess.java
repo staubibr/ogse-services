@@ -14,7 +14,7 @@ public class WorkflowProcess extends Process {
 
 	// TODO: Experiment should be nullable
 	public void execute(File workflow, File experiment, Folder output) throws Exception {
-		String[] a_command = { this.tool.toString(), workflow.toString(), experiment.toString(), output.path };
+		String[] a_command = { this.tool.toString(), workflow.toString(), experiment.toString(), output.path.toString() };
 
 		int exit = this.execute(a_command);
 		

@@ -26,12 +26,12 @@ public class SimulationService {
 	}
 
 	public Folder Execute(InputStream config, Long iterations, Double duration) throws Exception {
-		Folder scratch = this.scratch.create_uuid();
-		File scenario = scratch.copy(config, "scenario.json").file("scenario.json");
+		Folder f_scratch = this.scratch.create_uuid();
+		File scenario = f_scratch.copy(config, "scenario.json").file("scenario.json");
 
-		this.simulator.execute(scenario, iterations, duration, scratch);
+		this.simulator.execute(scenario, iterations, duration, f_scratch);
 
-		return scratch;
+		return f_scratch;
 	}
 
 	public Folder Execute(File config, Long iterations, Double duration) throws Exception {
